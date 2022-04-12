@@ -9,20 +9,23 @@ def PLAClassify(X, W):
 
 def PLATrain(X, Y, rand=False, rate=1, times=1000, pocket=True):
     W = np.zeros(X.shape[1]+1)
-    last_error = 0
     if pocket:
         rand = True
+        W1 = np.zeros(X.shape[1]+1)
+        last_error = X.shape[0]
+
     for count in range(times):
         error = np.where(Y != PLAClassify(X, W))[0]
         if len(error) != 0:
             idx = error[randrange(0, len(error)) if rand else 0]
-            W1 = W+np.append(X[idx, :], 1)*Y[idx]*rate
-            now_error = sum(Y != PLAClassify(X, W1))
-            if pocket and now_error > last_error:
-                pass
+            if pocket:
+                W1 = W + np.append(X[idx, :], 1)*Y[idx]*rate
+                now_error = sum(Y != PLAClassify(X, W1))
+                if now_error < last_error:
+                    W = W1
+                    last_error = now_error
             else:
-                W = W1
-                last_error = now_error
+                W += np.append(X[idx, :], 1)*Y[idx]*rate
         else:
             return W, count
     return W, count
